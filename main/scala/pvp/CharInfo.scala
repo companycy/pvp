@@ -1,0 +1,159 @@
+package server.pvp
+
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.HashMap
+
+/**
+ * Created by bjcheny on 6/14/14.
+ */
+class CharInfo(userId_c: Int, name_c: Array[Byte]) {
+  var id: Byte = 1
+
+  val name = name_c
+
+  var roomId = 0
+
+  var level = 0
+
+  var joystickPos = new CharJoystickPosition(0, 0)
+  val joystickPosArr = new ArrayBuffer[CharJoystickPosition]() // recved from client
+
+  var position = new Position(0, 0, 0)
+  var positionArr = new ArrayBuffer[CharPosition]() // recved from client
+
+  var rotation = new Rotation(0)
+  var rotationArr = new ArrayBuffer[CharRotation]() // recved from client
+
+  var status = new Status(0)
+  var statusArr = new ArrayBuffer[CharStatus]() // recved from client
+
+  var startedSkillArr = new ArrayBuffer[StartedSkill]() // recved from client
+  var triggeredSkillArr = new ArrayBuffer[TriggeredSkill]() // recved from client
+
+  val buffList = new HashMap[Byte, Buff]() // all buff list on this player
+  val appliedBuffList = new HashMap[Byte, Buff]() // calc dynamically
+
+  val maxHp = hp
+  var hp: Float = 10000
+  val maxMp = mp
+  var mp: Float = 200
+
+  var armor = 0
+
+  var maxAttack = 0
+  var minAttack = 0
+
+  var fireAttack = 0
+  var windAttack = 0
+  var coldAttack = 0
+  var lightningAttack = 0
+
+  var walkMaxSpeed = 0
+  var runMaxSpeed = 0
+
+  def updateState(charId: Int, state: CharState) = {
+  }
+
+  def calcAppliedBuff() {
+    for (i <- this.buffList) {
+      if (i._2.isToApply()) {
+        this.appliedBuffList(i._1) = i._2 // get appliedbufflist
+      }
+    }
+  }
+
+  // def isAppliedBuffValid(): Boolean = {
+  //   this.calcAppliedBuff()
+  //   return this.appliedBuffList.nonEmpty
+  // }
+
+  def updateByBuff() {
+    this.updateHpByBuff()
+    this.updateMpByBuff()
+
+    // clear it manually by room
+    // this.clearAppliedBuff()
+  }
+
+  def updateHpByBuff() {
+    for (i <- this.appliedBuffList) {
+      if (i._2.isHp()) {
+        this.hp = this.hp - i._2.getBuffValue()
+        i._2.updateDuration()
+      }
+    }
+  }
+
+  def updateMpByBuff() {
+    for (i <- this.appliedBuffList) {
+      if (i._2.isMp()) {
+        this.mp = this.mp - i._2.getBuffValue()
+        i._2.updateDuration()
+      }
+    }
+  }
+
+  def getId(): Byte = {
+    return this.id
+  }
+
+  def updateBufflist(buff: Buff) {
+    buffList(buff.id) = buff
+  }
+
+  // def updateBufflist(appliedSkillList: Array[AppliedSkill]): Unit = {
+  //   for (i <- appliedSkillList) {
+  //     val buffId = i.buff.id
+  //     buffList(buffId) = i.buff // todo:
+  //   }
+  // }
+
+  def isBuffListEmpty(): Boolean = {
+    return this.getBufflist().isEmpty
+  }
+
+  def isBuffListNonEmpty(): Boolean = {
+    return !this.isBuffListEmpty()
+  }
+
+  def getBufflist(): HashMap[Byte, Buff] = {
+    return this.buffList
+  }
+
+  def getBufflistSize(): Byte = {
+    return this.getBufflist().size.toByte
+  }
+
+  def getAppliedBuff(): HashMap[Byte, Buff] = {
+    return this.appliedBuffList
+  }
+
+  def getAppliedBuffSize(): Byte = {
+    return this.getAppliedBuff.size.toByte
+  }
+
+  def isAppliedBuffNonEmpty(): Boolean = {
+    return this.getAppliedBuff().nonEmpty
+  }
+
+  def clearBufflist() = {
+    this.buffList.retain((k, v) => v.isValid())
+  }
+
+  def clearAppliedBuff() = { // get applied bufflist every time from bufflist
+    this.appliedBuffList.clear()
+  }
+
+  def checkPosition(): Boolean = {
+    return position.isValid()
+  }
+
+  def updatePosition(position: Position) {
+    this.position = position
+  }
+
+  def updateRotation(rotation: Rotation) {
+    this.rotation = rotation
+  }
+
+}
