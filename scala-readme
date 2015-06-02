@@ -1,0 +1,52 @@
+trait Set[A <: Ordered[A]] { def incl(x: A): Set[A]
+        def contains(x: A): Boolean
+}
+The parameter declaration A <: Ordered[A] introduces A as a type parameter which must be a subtype of Ordered[A], i.e. its values must be comparable to values of the same type.
+
+
+
+
+??
+def A: =>Int => call by value
+def A: Int => call by name
+
+
+
+A more flexible design, which admits elements of these types, uses view bounds in- stead of the plain type bounds we have seen so far. The only change this entails in the example above is in the type parameters:
+trait Set[A <% Ordered[A]] ...
+class EmptySet[A <% Ordered[A]] ... class NonEmptySet[A <% Ordered[A]] ...
+View bounds <% are weaker than plain bounds <:: A view bounded type parameter clause [A <% T] only specifies that the bounded type A must be convertible to the bound type T, using an implicit conversion.
+
+
+However, we can enforce co-variant subtyping of stacks by changing the first line of the definition of class Stack as follows.
+class Stack[+A] {
+Prefixing a formal type parameter with a + indicates that subtyping is covariant in that parameter. Besides +, there is also a prefix - which indicates contra-variant subtyping. If Stack was defined class Stack[-A] ..., then T a subtype\
+ of type S would imply that Stack[S] is a subtype of Stack[T] (which in the case of stacks would be rather surprising!).
+
+
+
+Note that type parameters are never used in patterns; it would have been illegal to writecaseTuple2[Int, Int](n, d).
+
+
+All lists are built from two more fundamental constructors, Nil and :: (pronounced “cons”). Nil represents an empty list. The infix operator :: expresses list extension. That is, x :: xs represents a list whose first element is x, whi\
+ch is followed by (the elements of ) list xs.
+
+The ‘::’ operation associates to the right: A :: B :: C is interpreted as A :: (B :: C). Therefore, we can drop the parentheses in the definitions above. For instance, we can write shorter
+valnums = 1::2::3::4::Nil
+
+
+Concatenating lists. An operation similar to :: is list concatenation, written ‘:::’. The result of (xs ::: ys) is a list consisting of all elements of xs, followed by all elements of ys. Because it ends in a colon, ::: is right-assoc\
+iative and is considered as a method of its right-hand operand. Therefore,
+xs ::: ys ::: zs = xs ::: (ys ::: zs) = zs.:::(ys).:::(xs)
+
+
+(z /: List(x1, ..., xn))(op) = (...(z op x1) op ... ) op xn
+(List(x1, ..., xn) :\ z)(op) = x1 op ( ... (xn op z)...)
+
+
+Generally, a for-comprehension is of the form
+for ( s ) yield e
+Here, s is a sequence of generators, definitions and filters. A generator is of the form val x <- e,whereeisalist-valuedexpression.Itbindsxtosuccessivevaluesinthe list.Adefinitionisoftheformval x = e.Itintroducesxasanameforthevalueofe i\
+n the rest of the comprehension. A filter is an expression f of type Boolean. 
+
+
